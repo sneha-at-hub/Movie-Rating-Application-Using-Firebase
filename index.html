@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Rating App</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+ 
+    
+    <style>
+       body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #010f1e;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .form-control, .btn {
+            border-radius: 0;
+        }
+        .table thead th {
+            cursor: pointer;
+        }
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+        /* Navbar styles */
+        .navbar {
+            padding-top: 20px;
+            padding-bottom: 20px;
+            background-color: #010d19 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .navbar-brand {
+            font-size: 2rem;
+            font-weight: 600;
+            animation: slideIn 1s ease-out;
+        }
+        .nav-link {
+            margin-right: 1rem;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #ffc107;
+        }
+        .navbar-nav .dropdown-menu {
+            background-color: #343a40;
+            border: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .dropdown-item {
+            color: #ffffff;
+            transition: background-color 0.3s ease;
+        }
+        .dropdown-item:hover {
+            background-color: #495057;
+        }
+        /* Table border radius */
+        .table {
+            border-radius: 8px;
+        }
+        /* Button border radius */
+        .btn {
+            border-radius: 8px;
+        }
+        @keyframes rotateIn {
+            from {
+                transform: rotate(-360deg);
+                opacity: 0;
+            }
+            to {
+                transform: rotate(0);
+                opacity: 1;
+            }
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        tbody tr {
+        background-color: white;
+        color: black;
+    }
+    
+    /* Style for custom select */
+.custom-select {
+    background-color: #343a40; /* Dark background */
+    color: #ffffff; /* White text */
+    border-color: #A567CF; /* Custom border color */
+}
+
+/* Style for dropdown arrow */
+.custom-select::after {
+    border-color: #ffffff transparent transparent; /* White arrow with transparent top and bottom */
+}
+
+/* Hover effect for custom select */
+.custom-select:hover {
+    background-color: #495057; /* Darker background on hover */
+}
+
+
+    </style>
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark py-4">
+        <a class="navbar-brand" href="#">
+            <img src="logo.png" width="140" height="auto" class="d-inline-block align-top logo" alt="Logo" loading="lazy">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+                <li class="nav-item dropdown">
+                   
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Account</a>
+                        <a class="dropdown-item" href="#">Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Logout</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </header>
+    
+
+
+    <div class="container">
+        
+       
+        <!-- Button to trigger modal -->
+        <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#addMovieModal" style="background-color: #d50000; border: 1px solid #d50000;">
+            Add Movie Rating
+        </button>
+
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th data-sort="movieName">Movie Name</th>
+                    <th data-sort="ratingScore">Rating</th>
+                    <th data-sort="directorName">Director</th>
+                    <th data-sort="releaseDate">Release Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="movieList">
+                <!-- Movie entries will be added here dynamically -->
+            </tbody>
+        </table>
+    </div>
+    <div class="modal fade" id="addMovieModal" tabindex="-1" aria-labelledby="addMovieModalLabel" aria-hidden="true">
+        <div class="modal-dialog" >
+            <div class="modal-content bg-dark text-light" style="border-radius: 15px; background-color: #8b33b4; border-color: #362c3d;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMovieModalLabel" style="color: white ; ">Add Movie Rating</h5>
+                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" >
+                    <form id="movieForm">
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <input type="text" class="form-control bg-dark text-light rounded-10" id="movieName" placeholder="Movie Name" required style="border-radius: 10px;">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <select class="form-control bg-dark text-light rounded-10" id="ratingScore" required style="border-radius: 10px; background-color: #343a40; color: #ffffff;  -webkit-appearance: none; -moz-appearance: none; appearance: none;">
+                                    <option value="" disabled selected style="display: none;">Rating (0-5)</option>
+                                    <option value="0" style="background-color: #343a40; color: #ffffff;">0</option>
+                                    <option value="1" style="background-color: #343a40; color: #ffffff;">1</option>
+                                    <option value="2" style="background-color: #343a40; color: #ffffff;">2</option>
+                                    <option value="3" style="background-color: #343a40; color: #ffffff;">3</option>
+                                    <option value="4" style="background-color: #343a40; color: #ffffff;">4</option>
+                                    <option value="5" style="background-color: #343a40; color: #ffffff;">5</option>
+                                </select>
+                            </div>
+                            
+                           
+                            
+                            
+                            
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control bg-dark text-light rounded-10" id="directorName" placeholder="Director Name" required style="border-radius: 10px;">
+                            </div>
+                            <div class="form-group col-md-12">
+                                <input type="date" class="form-control bg-dark text-light rounded-10" id="releaseDate" placeholder="Release Date" required style="border-radius: 10px;">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block rounded-10" style="background-color: #d50000; border-color: #d50000;">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="editMovieModal" tabindex="-1" aria-labelledby="editMovieModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-light" style="border-radius: 15px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editMovieModalLabel" style="color: white;">Edit Movie Rating</h5>
+                    <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editMovieForm">
+                        <input type="hidden" id="editMovieIndex">
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <input type="text" class="form-control bg-dark text-light rounded-10" id="editMovieName" placeholder="Movie Name" required style="border-radius: 10px;">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <input type="number" class="form-control bg-dark text-light rounded-10" id="editRatingScore" placeholder="Rating (0-5)" min="0" max="5" required style="border-radius: 10px;">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <input type="text" class="form-control bg-dark text-light rounded-10" id="editDirectorName" placeholder="Director Name" required style="border-radius: 10px;">
+                            </div>
+                            <div class="form-group col-md-12">
+                                <input type="date" class="form-control bg-dark text-light rounded-10" id="editReleaseDate" placeholder="Release Date" required style="border-radius: 10px;">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block rounded-10" style="background-color: #d50000; border-color: #d50000;">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- Movie Added Alert -->
+<div id="movieAddedAlert" class="alert alert-success alert-dismissible fade show mt-3" role="alert" style="display: none; width: 500px; margin: 0 auto; border-radius: 10px;">
+    <span style="font-size: 18px;">Movie added successfully!</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="outline: none;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+  
+<div id="movieEditAlert" class="alert alert-success alert-dismissible fade show mt-3" role="alert" style="display: none; width: 500px; margin: 0 auto; border-radius: 10px;">
+    <span style="font-size: 18px;">Movie updated successfully!</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="outline: none;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<!-- Movie Delete Alert -->
+<div id="movieDeleteAlert" class="alert alert-warning alert-dismissible fade show mt-3" role="alert" style="display: none; width: 500px; margin: 0 auto; border-radius: 10px;">
+    <span style="font-size: 18px;">Movie deleted successfully!</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="outline: none;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+
+
+
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-firestore.js";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyANc1JArHTXkqywOufWGF7V6Z3xkIUl5k8",
+    authDomain: "coursework-f6401.firebaseapp.com",
+    projectId: "coursework-f6401",
+    storageBucket: "coursework-f6401.appspot.com",
+    messagingSenderId: "656088284943",
+    appId: "1:656088284943:web:08e4883014d8d911b6487a"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const moviesCollection = collection(db, 'Ratings');
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const movieForm = document.getElementById('movieForm');
+    const editMovieForm = document.getElementById('editMovieForm');
+    const movieList = document.getElementById('movieList');
+    const movieAddedAlert = document.getElementById('movieAddedAlert');
+    let movies = [];
+
+    // Fetch movies from Firestore
+    const querySnapshot = await getMoviesFromFirestore();
+    movies = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderMovies();
+
+    // Event listener for the movie form submission
+    movieForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const movie = {
+            movie_name: document.getElementById('movieName').value,
+            rating_score: document.getElementById('ratingScore').value,
+            director_name: document.getElementById('directorName').value,
+            Release_date: document.getElementById('releaseDate').value
+        };
+        const docRef = await addMovieToFirestore(movie);
+        movie.id = docRef.id; // Ensure the movie has its new ID
+        movies.push(movie);
+        renderMovies();
+        movieForm.reset();
+        showMovieAddedAlert();
+        $('#addMovieModal').modal('hide');
+    });
+
+    // Event listener for the edit button click
+    movieList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('edit-btn')) {
+            const index = e.target.dataset.index;
+            populateEditForm(index);
+            $('#editMovieModal').modal('show');
+        }
+    });
+
+    // Event listener for the edit form submission
+    editMovieForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const index = document.getElementById('editMovieIndex').value;
+        const updatedMovie = {
+            movie_name: document.getElementById('editMovieName').value,
+            rating_score: document.getElementById('editRatingScore').value,
+            director_name: document.getElementById('editDirectorName').value,
+            Release_date: document.getElementById('editReleaseDate').value
+        };
+        const movieId = movies[index].id;
+        await updateMovieInFirestore(movieId, updatedMovie);
+        movies[index] = { id: movieId, ...updatedMovie }; // Update local array
+        renderMovies();
+        showEditAlert();
+        $('#editMovieModal').modal('hide');
+    });
+    // Function to show the delete alert
+function showDeleteAlert() {
+    const deleteAlert = document.getElementById('movieDeleteAlert');
+    deleteAlert.style.display = 'block';
+    setTimeout(() => {
+        deleteAlert.style.display = 'none';
+    }, 10000); // Hide the alert after 2 seconds
+}
+
+    // Event listener for the delete button click
+    movieList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('delete-btn')) {
+            const index = e.target.dataset.index;
+            const movieId = movies[index].id;
+            await deleteMovieFromFirestore(movieId);
+            movies.splice(index, 1);
+            renderMovies();
+            showDeleteAlert();
+        }
+    });
+
+    // Function to render movies in the table
+    function renderMovies() {
+        movieList.innerHTML = movies.map((movie, index) => `
+            <tr>
+                <td>${movie.movie_name}</td>
+                <td>${movie.rating_score}</td>
+                <td>${movie.director_name}</td>
+                <td>${movie.Release_date}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit-btn" data-index="${index}">Edit</button>
+                    <button class="btn btn-sm btn-danger delete-btn" data-index="${index}">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+    // Function to show the edit alert
+function showEditAlert() {
+    const editAlert = document.getElementById('movieEditAlert');
+    editAlert.style.display = 'block';
+    setTimeout(() => {
+        editAlert.style.display = 'none';
+    }, 2000); // Hide the alert after 2 seconds
+}
+
+    // Function to show the movie added alert
+    function showMovieAddedAlert() {
+        movieAddedAlert.style.display = 'block';
+        setTimeout(() => {
+            movieAddedAlert.style.display = 'none';
+        }, 2000); // Hide the alert after 2 seconds
+    }
+
+    // Function to populate the edit form with movie data
+    function populateEditForm(index) {
+        const movie = movies[index];
+        document.getElementById('editMovieName').value = movie.movie_name;
+        document.getElementById('editRatingScore').value = movie.rating_score;
+        document.getElementById('editDirectorName').value = movie.director_name;
+        document.getElementById('editReleaseDate').value = movie.Release_date;
+        document.getElementById('editMovieIndex').value = index;
+    }
+
+    // Function to add a movie to Firestore
+    async function addMovieToFirestore(movie) {
+        try {
+            const docRef = await addDoc(moviesCollection, movie);
+            console.log("Document written with ID: ", docRef.id);
+            return docRef;
+        } catch (e) {
+            console.error("Error adding document: ", e);
+        }
+    }
+
+    // Function to delete a movie from Firestore
+    async function deleteMovieFromFirestore(movieId) {
+        try {
+            await deleteDoc(doc(db, 'Ratings', movieId));
+            console.log("Document deleted successfully");
+        } catch (e) {
+            console.error("Error deleting document: ", e);
+        }
+    }
+
+    // Function to update a movie in Firestore
+    async function updateMovieInFirestore(movieId, updatedMovie) {
+        try {
+            const movieDoc = doc(db, 'Ratings', movieId);
+            await updateDoc(movieDoc, updatedMovie);
+            console.log("Document updated successfully");
+        } catch (e) {
+            console.error("Error updating document: ", e);
+        }
+    }
+
+    // Function to get movies from Firestore
+    async function getMoviesFromFirestore() {
+        try {
+            const snapshot = await getDocs(moviesCollection);
+            return snapshot;
+        } catch (e) {
+            console.error("Error getting documents: ", e);
+        }
+    }
+});
+
+
+    </script>
+
+</body>
+</html>
+
